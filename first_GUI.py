@@ -2,7 +2,7 @@ from Tkinter import *
 import tkMessageBox
 
 
-def showFirstConfig(authorize_url):
+def showFirstConfig(authorize_url, uploader):
     length = len(authorize_url) + 30
     root = Tk()
 
@@ -59,19 +59,14 @@ def showFirstConfig(authorize_url):
     ent6.pack()
 
     def saveKey():
-        try:
-            if(len(ent6.get())>10):
-                f = open('code.txt','w+')
-                f.writelines(ent6.get().split())
-                f.close();
-                root.destroy()
+        if(len(ent6.get())>10):
+            uploader.set_code(ent6.get())
+            root.destroy()
 
-            else:
-                tkMessageBox.showinfo(title="Error",
+        else:
+            tkMessageBox.showinfo(title="Error",
                                       message="Chiave non corretta, riprova")
-        except:
-            tkMessageBox.showinfo(title="Error", message="Problema nel salvataggio della chiave, procedura annullata")
-            exit(0)
+
     b1 = Button(root, text='OK', command=saveKey)
     b1.grid(row=7)
     b1.pack(side='left')
