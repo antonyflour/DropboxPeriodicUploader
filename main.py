@@ -10,8 +10,8 @@ import util
 
 #Main del programma
 
-path_file_local='C:/Users/anton/Documents/Prova/prova.txt'
-path_file_remote='/Prova/prova.txt'
+path_local= 'C:/Users/anton/Documents/Prova/prova.txt'
+path_remote= '/Prova/prova.txt'
 
 delta_time = 1
 last_sinc_time=0
@@ -22,7 +22,7 @@ app_key = uploader.app_key
 app_secret = uploader.app_secret
 
 # se il percorso specificato non porta ne' ad un file ne' ad una cartella, si interrompe il programma
-if not os.path.isfile(path_file_local) and not os.path.isdir(path_file_local):
+if not os.path.isfile(path_local) and not os.path.isdir(path_local):
     graphic_util.show_error_msg("Il file da caricare non e' stato trovato")
     exit(0)
 
@@ -43,7 +43,10 @@ def periodic_upload():
                 if i.is_alive():
                     now_time = util.get_now_time_minutes()
                     if (now_time - last_sinc_time) >= delta_time:
-                        uploader.upload_file(path_file_local, path_file_remote)
+                        if os.path.isfile(path_local):
+                            uploader.upload_file(path_local, path_remote)
+                        else:
+                            uploader.upload_directory(path_local, path_remote)
                         global last_sinc_time
                         last_sinc_time = now_time
                     sleep(5)

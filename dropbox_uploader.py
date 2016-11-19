@@ -65,7 +65,6 @@ class DropboxUploader:
     def upload_file(self, path_file_local, path_file_remote):
         try:
             client = dropbox.client.DropboxClient(self.config.get_key())
-            print 'linked account: ', client.account_info()
             f = open(path_file_local, 'rb')
             try:
                 client.file_delete(path_file_remote)
