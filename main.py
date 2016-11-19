@@ -35,6 +35,7 @@ while not uploader.has_valid_access_token():
 
 # thread in esecuzione fin quando e' in esecuzione anche il mainThread
 def periodic_upload():
+    #aspetto 10 secondi prima del tentativo di connessione (utile durante l'esecuzione automatica in startup)
     sleep(10)
     while True:
         for i in threading.enumerate():
