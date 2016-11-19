@@ -87,3 +87,7 @@ class DropboxUploader:
         except Exception, e:
             graphic_util.show_error_msg(e.message)
             os._exit(0)
+
+    def upload_directory(self, path_dir_local, path_dir_remote):
+    #implementare il caricamento di un'intera cartella
+        return
