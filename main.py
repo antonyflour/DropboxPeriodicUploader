@@ -10,8 +10,8 @@ import util
 
 #Main del programma
 
-path_local= 'C:/Users/anton/Documents/Prova/prova.txt'
-path_remote= '/Prova/prova.txt'
+path_local= 'C:/Users/anton/Documents/Prova'
+path_remote= '/Prova'
 
 delta_time = 1
 last_sinc_time=0
@@ -40,20 +40,35 @@ def periodic_upload():
     while True:
         for i in threading.enumerate():
             if i.name == 'MainThread':
+                #verifico che il main sia ancora attivo
                 if i.is_alive():
                     now_time = util.get_now_time_minutes()
+                    #verifico che sia scaduto il delta time (intervallo di sincronizzazione)
                     if (now_time - last_sinc_time) >= delta_time:
+
+                        #se il path punta ad un file
                         if os.path.isfile(path_local):
+                            #carico un file
                             uploader.upload_file(path_local, path_remote)
+
+                        #se punta ad una directory
                         else:
+                            #carico tutti i file all'interno della directory, rispettando l'albero delle directory
                             uploader.upload_directory(path_local, path_remote)
+
+                        #aggiorno il time dell'ultima sincronizzazione
                         global last_sinc_time
                         last_sinc_time = now_time
+
+                    #sospendo il processo per 5 secondi
                     sleep(5)
+
+                #se il main non e' piu' attivo, termino anche il processo di caricamento
                 else:
                     exit(0)
 
 
+#avvio il caricamento in un altro thread; il thread principale viene usato dalla tray icon
 thread_uploader = threading.Thread(name='PeriodicUploader',target=periodic_upload)
 thread_uploader.start()
 tray_icon = TrayIcon(False)
