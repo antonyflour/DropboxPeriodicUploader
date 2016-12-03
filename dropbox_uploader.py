@@ -96,43 +96,38 @@ class DropboxUploader:
             #carico tutti i file trovati
             for root, dirnames, filenames in os.walk(path_dir_local):
                 for filename in filenames:
-                    abs_local_path = os.path.join(root, filename).replace('\\', '/')
-                    rel_local_path = os.path.relpath(abs_local_path, path_dir_local).replace('\\', '/')
-                    path_file_remote = path_dir_remote+'/'+rel_local_path
+                    if not filename.endswith('.ldb') :
+                        abs_local_path = os.path.join(root, filename).replace('\\', '/')
+                        rel_local_path = os.path.relpath(abs_local_path, path_dir_local).replace('\\', '/')
+                        path_file_remote = path_dir_remote+'/'+rel_local_path
 
-                    #provo a leggere il file locale
-                    try:
-                        f = open(abs_local_path, 'rb')
+                        #provo a leggere il file locale
                         try:
-                            client.file_delete(path_file_remote)
-                        except dropbox.rest.ErrorResponse:
-                            # l'eccezione indica che il file da rimuovere non esiste, non ha importanza
-                            pass
+                            f = open(abs_local_path, 'rb')
+                            try:
+                                client.file_delete(path_file_remote)
+                            except dropbox.rest.ErrorResponse:
+                                # l'eccezione indica che il file da rimuovere non esiste, non ha importanza
+                                pass
 
-                        #carico il file
-                        response = client.put_file(path_file_remote, f)
-                        print 'uploaded: ', response
-                        f.close();
+                            #carico il file
+                            response = client.put_file(path_file_remote, f)
+                            print 'uploaded: ', response
+                            f.close();
 
-                    except dropbox.rest.ErrorResponse, e:
+                        except dropbox.rest.ErrorResponse, e:
+                            graphic_util.show_error_msg(e.message)
 
-                        graphic_util.show_error_msg(e.message)
+                        except urllib3.exceptions.MaxRetryError:
+                            graphic_util.show_error_msg("Non sei collegato alla rete! ")
+                            os._exit(0)
 
-                    except urllib3.exceptions.MaxRetryError:
+                        except IOError:
+                            graphic_util.show_error_msg("Il file da caricare non e' stato trovato ")
 
-                        graphic_util.show_error_msg("Non sei collegato alla rete! ")
-
-                        os._exit(0)
-
-                    except IOError:
-
-                        graphic_util.show_error_msg("Il file da caricare non e' stato trovato ")
-
-                    except Exception, e:
-
-                        graphic_util.show_error_msg(e.message)
-
-                        os._exit(0)
+                        except Exception, e:
+                            graphic_util.show_error_msg(e.message)
+                            os._exit(0)
 
         except dropbox.rest.ErrorResponse, e:
             graphic_util.show_error_msg(e.message)
