@@ -73,5 +73,3 @@ thread_uploader = threading.Thread(name='PeriodicUploader',target=periodic_uploa
 thread_uploader.start()
 tray_icon = TrayIcon(False)
 tray_icon.show()
-
-
