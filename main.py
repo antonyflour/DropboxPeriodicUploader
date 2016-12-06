@@ -13,7 +13,7 @@ import util
 path_local= 'C:/Users/anton/Documents/Prova'
 path_remote= '/Prova'
 
-delta_time = 1
+delta_time = 3
 last_sinc_time=0
 
 

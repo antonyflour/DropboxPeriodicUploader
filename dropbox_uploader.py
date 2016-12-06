@@ -54,7 +54,7 @@ class DropboxUploader:
             self.test_connection(self.config.get_key())
             return True
         except dropbox.rest.ErrorResponse, e:
-            graphic_util.show_error_msg("Codice errato, effettua di nuovo la configurazione [dropbox_uploader.py line 57]" + str(e))
+            graphic_util.show_error_msg("Codice errato, effettua di nuovo la configurazione [dropbox_uploader.py line 57]" + e.message)
             self.config.set_code('')
             self.config.set_key('')
             return False
@@ -62,7 +62,7 @@ class DropboxUploader:
             graphic_util.show_error_msg("Non sei collegato alla rete! [dropbox_uploader.py line 62")
             exit(0)
         except Exception, e:
-            graphic_util.show_error_msg("[dropbox_uploader.py line65]"+ str(e))
+            graphic_util.show_error_msg("[dropbox_uploader.py line65]"+ e.message)
             exit(0)
 
     def upload_file(self, path_file_local, path_file_remote):
@@ -75,8 +75,6 @@ class DropboxUploader:
                 #l'eccezione indica che il file da rimuovere non esiste, non ha importanza
                 pass
             response = client.put_file(path_file_remote, f)
-            print 'uploaded: ', response
-            f.close();
         except dropbox.rest.ErrorResponse, e:
             graphic_util.show_error_msg(e.message)
             os._exit(0)
@@ -114,32 +112,29 @@ class DropboxUploader:
 
                             #carico il file
                             response = client.put_file(path_file_remote, f)
-                            print 'uploaded: ', response
-                            f.close();
-
                         except dropbox.rest.ErrorResponse, e:
-                            graphic_util.show_error_msg("[dropbox_uploader.py line 120] "+ str(e))
+                            graphic_util.show_error_msg("[dropbox_uploader.py line 120] "+ e.message)
 
                         except urllib3.exceptions.MaxRetryError:
                             graphic_util.show_error_msg("Non sei collegato alla rete! ")
                             os._exit(0)
 
                         except IOError, e:
-                            graphic_util.show_error_msg("Il file da caricare non e' stato trovato [dropbox_uploader.py line 127] "+str(e))
+                            graphic_util.show_error_msg("Il file da caricare non e' stato trovato [dropbox_uploader.py line 127] "+e.message)
 
                         except Exception, e:
-                            graphic_util.show_error_msg("[dropbox_uploader.py line 127]"+str(e))
+                            graphic_util.show_error_msg("[dropbox_uploader.py line 127]"+e.message)
                             os._exit(0)
 
         except dropbox.rest.ErrorResponse, e:
-            graphic_util.show_error_msg("[dropbox_uploader.py line 135] " + str(e))
+            graphic_util.show_error_msg("[dropbox_uploader.py line 135] " + e.message)
             os._exit(0)
         except urllib3.exceptions.MaxRetryError:
             graphic_util.show_error_msg("Non sei collegato alla rete! ")
             os._exit(0)
         except IOError:
-            graphic_util.show_error_msg("Il file da caricare non e' stato trovato [dropbox_uploader.py line 141] " + str(e))
+            graphic_util.show_error_msg("Il file da caricare non e' stato trovato [dropbox_uploader.py line 141] " + e.message)
             os._exit(0)
         except Exception, e:
-            graphic_util.show_error_msg("[dropbox_uploader.py line 144]" + str(e))
+            graphic_util.show_error_msg("[dropbox_uploader.py line 144]" + e.message)
             os._exit(0)
