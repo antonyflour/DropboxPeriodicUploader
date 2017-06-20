@@ -45,23 +45,22 @@ def periodic_upload():
                     now_time = util.get_now_time_minutes()
                     #verifico che sia scaduto il delta time (intervallo di sincronizzazione)
                     if (now_time - last_sinc_time) >= delta_time:
-                        try:
-                            #se il path punta ad un file
-                            if os.path.isfile(path_local):
-                                #carico un file
-                                uploader.upload_file(path_local, path_remote)
 
-                            #se punta ad una directory
-                            else:
-                                #carico tutti i file all'interno della directory, rispettando l'albero delle directory
-                                uploader.upload_directory(path_local, path_remote)
+                        #se il path punta ad un file
+                        if os.path.isfile(path_local):
+                            #carico un file
+                            uploader.upload_file(path_local, path_remote)
 
-                            #aggiorno il time dell'ultima sincronizzazione
-                            global last_sinc_time
-                            last_sinc_time = now_time
+                        #se punta ad una directory
+                        else:
+                            #carico tutti i file all'interno della directory, rispettando l'albero delle directory
+                            uploader.upload_directory(path_local, path_remote)
 
-                        except urllib3.exceptions.MaxRetryError:
-                            graphic_util.show_error_msg("Non sei collegato alla rete! ")
+                        #aggiorno il time dell'ultima sincronizzazione
+                        global last_sinc_time
+                        last_sinc_time = now_time
+
+
 
                     #sospendo il processo per 5 secondi
                     sleep(5)
