@@ -115,6 +115,9 @@ class DropboxUploader:
                         except dropbox.rest.ErrorResponse, e:
                             graphic_util.show_error_msg("[dropbox_uploader.py line 120] "+ e.message)
 
+                        except urllib3.exceptions.MaxRetryError:
+                            graphic_util.show_error_msg("Non sei collegato alla rete! ")
+                            os._exit(0)
                         except IOError, e:
                             graphic_util.show_error_msg("Il file da caricare non e' stato trovato [dropbox_uploader.py line 127] "+e.message)
 

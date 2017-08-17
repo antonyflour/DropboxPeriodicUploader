@@ -83,8 +83,6 @@ def periodic_upload():
             #sospendo il processo per 5 secondi
             sleep(5)
 
-
-
 #avvio il caricamento in un altro thread; il thread principale viene usato dalla tray icon
 thread_uploader = threading.Thread(name='PeriodicUploader',target=periodic_upload)
 thread_uploader.start()
