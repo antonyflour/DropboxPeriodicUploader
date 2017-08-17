@@ -21,7 +21,7 @@ class DropboxUploader:
             self.config.set_app_secret(self.app_secret)
 
     def get_authorize_URL(self):
-        self.flow = dropbox.client.DropboxOAuth2FlowNoRedirect(self.app_key, self.app_secret)
+        self.flow = dropbox.oauth.DropboxOAuth2FlowNoRedirect(self.app_key, self.app_secret)
         authorize_url = self.flow.start()
         return authorize_url
 
@@ -30,8 +30,8 @@ class DropboxUploader:
 
     def obtain_access_token(self):
         try:
-            access_token, user_id = self.flow.finish(self.config.get_code())
-            self.config.set_key(access_token)
+            oauth_result = self.flow.finish(self.config.get_code())
+            self.config.set_key(oauth_result.access_token)
         except dropbox.rest.ErrorResponse:
             graphic_util.show_error_msg("Codice errato, effettua di nuovo la configurazione ")
             self.config.set_code('')
@@ -58,10 +58,10 @@ class DropboxUploader:
         if self.config.get_key() == '':
             return False
         try:
-            client = dropbox.client.DropboxClient(self.config.get_key())
-            client.account_info()
+            dbox = dropbox.Dropbox(self.config.get_key())
+            dbox.users_get_current_account()
             return True
-        except dropbox.rest.ErrorResponse, e:
+        except dropbox.exceptions.AuthError, e:
             graphic_util.show_error_msg("Codice errato, effettua di nuovo la configurazione [dropbox_uploader.py line 57]" + e.message)
             self.config.set_code('')
             self.config.set_key('')
@@ -72,15 +72,15 @@ class DropboxUploader:
 
     def upload_file(self, path_file_local, path_file_remote):
         try:
-            client = dropbox.client.DropboxClient(self.config.get_key())
+            dbox = dropbox.Dropbox(self.config.get_key())
             f = open(path_file_local, 'rb')
             try:
-                client.file_delete(path_file_remote)
-            except dropbox.rest.ErrorResponse:
+                dbox.files_delete(path_file_remote)
+            except dropbox.exceptions.ApiError:
                 #l'eccezione indica che il file da rimuovere non esiste, non ha importanza
                 pass
-            response = client.put_file(path_file_remote, f)
-        except dropbox.rest.ErrorResponse, e:
+            response = dbox.files_upload(f.read(),path_file_remote)
+        except dropbox.exceptions.ApiError, e:
             graphic_util.show_error_msg(e.message)
             os._exit(0)
         except IOError:
@@ -90,8 +90,7 @@ class DropboxUploader:
 
     def upload_directory(self, path_dir_local, path_dir_remote):
         try:
-            client = dropbox.client.DropboxClient(self.config.get_key())
-            client.account_info()
+            dbox = dropbox.Dropbox(self.config.get_key())
 
             #carico tutti i file trovati
             for root, dirnames, filenames in os.walk(path_dir_local):
@@ -105,14 +104,14 @@ class DropboxUploader:
                         try:
                             f = open(abs_local_path, 'rb')
                             try:
-                                client.file_delete(path_file_remote)
-                            except dropbox.rest.ErrorResponse:
+                                dbox.files_delete(path_file_remote)
+                            except dropbox.exceptions.ApiError:
                                 # l'eccezione indica che il file da rimuovere non esiste, non ha importanza
                                 pass
 
                             #carico il file
-                            response = client.put_file(path_file_remote, f)
-                        except dropbox.rest.ErrorResponse, e:
+                            response = dbox.files_upload(f.read(),path_file_remote)
+                        except dropbox.exceptions.ApiError, e:
                             graphic_util.show_error_msg("[dropbox_uploader.py line 120] "+ e.message)
 
                         except urllib3.exceptions.MaxRetryError:
@@ -121,7 +120,7 @@ class DropboxUploader:
                         except IOError, e:
                             graphic_util.show_error_msg("Il file da caricare non e' stato trovato [dropbox_uploader.py line 127] "+e.message)
 
-        except dropbox.rest.ErrorResponse, e:
+        except dropbox.exceptions.ApiError, e:
             graphic_util.show_error_msg("[dropbox_uploader.py line 135] " + e.message)
             os._exit(0)
         except IOError:
