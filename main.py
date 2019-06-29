@@ -14,9 +14,6 @@ from PIL import Image
 
 #Main del programma
 
-# path_local= 'C:/Users/admin/eDT Consulting'
-# path_remote= '/Backup/Negozio-Facile-2.0_backup.zip'
-# path_zip = 'C:/Users/admin/Negozio-Facile-2.0_backup'
 path_local= 'C:/Users/admin/prova'
 path_remote= '/Backup/prova_backup.zip'
 path_zip = 'C:/Users/admin/prova_backup'
