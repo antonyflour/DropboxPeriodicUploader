@@ -1,8 +1,8 @@
-from Tkinter import Tk
-import tkMessageBox
+from tkinter import Tk
+from tkinter import messagebox
 
 def show_error_msg(msg):
     tk = Tk()
     tk.withdraw()
-    tkMessageBox.showinfo(title="Error", message=msg)
+    messagebox.showinfo(title="Error", message=msg)
     tk.destroy()

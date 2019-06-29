@@ -1,5 +1,4 @@
 from dropbox_uploader import DropboxUploader
-from tray import TrayIcon
 import os
 import graphic_util
 import first_GUI
@@ -7,14 +6,25 @@ import threading
 from time import sleep
 import util
 import urllib3
+import os, shutil
+import pystray
+from pystray import MenuItem, Menu
+from PIL import Image
+
 
 #Main del programma
 
-path_local= 'C:/Users/anton/Documents/Prova'
-path_remote= '/Prova'
-
+# path_local= 'C:/Users/admin/eDT Consulting'
+# path_remote= '/Backup/Negozio-Facile-2.0_backup.zip'
+# path_zip = 'C:/Users/admin/Negozio-Facile-2.0_backup'
+path_local= 'C:/Users/admin/prova'
+path_remote= '/Backup/prova_backup.zip'
+path_zip = 'C:/Users/admin/prova_backup'
+extension = ".zip"
 delta_time = 1
+
 last_sinc_time=0
+_FINISH = False
 
 
 uploader = DropboxUploader()
@@ -49,30 +59,30 @@ def periodic_upload():
             uploader.obtain_access_token()
 
         #inizio il caricamento
-        while mainThread.is_alive():
+        while(not _FINISH):
+            # rimuovo il file zip se gia esiste
+            if os.path.exists(path_zip+extension):
+                os.remove(path_zip+extension)
+
+            #comprimo la cartella da caricare in un unico archivio zip
+            shutil.make_archive(path_zip, 'zip', root_dir=path_local, base_dir=path_local)
+
             now_time = util.get_now_time_minutes()
+            global last_sinc_time
             #verifico che sia scaduto il delta time (intervallo di sincronizzazione)
             if (now_time - last_sinc_time) >= delta_time:
                 try:
-                    #se il path punta ad un file
-                    if os.path.isfile(path_local):
-                        #carico un file
-                        uploader.upload_file(path_local, path_remote)
-
-                    #se punta ad una directory
-                    else:
-                        #carico tutti i file all'interno della directory, rispettando l'albero delle directory
-                        uploader.upload_directory(path_local, path_remote)
+                    #carico il file zip
+                    uploader.upload_file(path_zip+extension, path_remote)
 
                     #aggiorno il time dell'ultima sincronizzazione
-                    global last_sinc_time
                     last_sinc_time = now_time
 
                 #se il caricamento fallisce per mancanza di connessione mi metto in attesa di avere connessione
                 except urllib3.exceptions.MaxRetryError:
                     graphic_util.show_error_msg("Attendo che tu sia collegato alla rete! ")
                     while not uploader.has_connection():
-                        if not mainThread.is_alive():
+                        if _FINISH:
                             # se il main non e' piu' attivo, termino anche il processo di caricamento
                             exit(0)
                         else:
@@ -86,5 +96,18 @@ def periodic_upload():
 #avvio il caricamento in un altro thread; il thread principale viene usato dalla tray icon
 thread_uploader = threading.Thread(name='PeriodicUploader',target=periodic_upload)
 thread_uploader.start()
-tray_icon = TrayIcon(False)
-tray_icon.show()
+
+#creo l'icona
+TRAY_TOOLTIP = 'Dropbox Periodic Uploader'
+TRAY_ICON = 'icon.png'
+
+def stop():
+    global _FINISH
+    _FINISH = True
+    icon.stop()
+
+menu = Menu((MenuItem('Exit', stop)))
+image = Image.open(TRAY_ICON)
+
+icon = pystray.Icon(TRAY_TOOLTIP, image, TRAY_TOOLTIP, menu)
+icon.run()

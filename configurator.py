@@ -15,16 +15,16 @@ class Configurator:
         self.data['key']=self._read_value_field(self.file_name,'key')
 
     def print_data(self):
-        print self.data
+        print(self.data)
 
     def _read_value_field(self, file_name, field):
-        field = field + '='
         file = open(file_name,'r')
         lines = file.readlines()
         file.close()
         for str in lines:
-            if field in str:
-                return str[len(field):].replace('\n','')
+            array = str.split("=")
+            if field==array[0]:
+                return array[1].replace('\n','')
         return ''
 
 
