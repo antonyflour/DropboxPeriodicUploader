@@ -58,34 +58,37 @@ def periodic_upload():
         #inizio il caricamento
         while(not _FINISH):
             # rimuovo il file zip se gia esiste
-            if os.path.exists(path_zip+extension):
-                os.remove(path_zip+extension)
+            try:
+                if os.path.exists(path_zip+extension):
+                    os.remove(path_zip+extension)
 
-            #comprimo la cartella da caricare in un unico archivio zip
-            shutil.make_archive(path_zip, 'zip', root_dir=path_local, base_dir=path_local)
+                #comprimo la cartella da caricare in un unico archivio zip
+                shutil.make_archive(path_zip, 'zip', root_dir=path_local, base_dir=path_local)
 
-            now_time = util.get_now_time_minutes()
-            global last_sinc_time
-            #verifico che sia scaduto il delta time (intervallo di sincronizzazione)
-            if (now_time - last_sinc_time) >= delta_time:
-                try:
-                    #carico il file zip
-                    uploader.upload_file(path_zip+extension, path_remote)
+                now_time = util.get_now_time_minutes()
+                global last_sinc_time
+                #verifico che sia scaduto il delta time (intervallo di sincronizzazione)
+                if (now_time - last_sinc_time) >= delta_time:
+                    try:
+                        #carico il file zip
+                        uploader.upload_file(path_zip+extension, path_remote)
 
-                    #aggiorno il time dell'ultima sincronizzazione
-                    last_sinc_time = now_time
+                        #aggiorno il time dell'ultima sincronizzazione
+                        last_sinc_time = now_time
 
-                #se il caricamento fallisce per mancanza di connessione mi metto in attesa di avere connessione
-                except urllib3.exceptions.MaxRetryError:
-                    graphic_util.show_error_msg("Attendo che tu sia collegato alla rete! ")
-                    while not uploader.has_connection():
-                        if _FINISH:
-                            # se il main non e' piu' attivo, termino anche il processo di caricamento
-                            exit(0)
-                        else:
-                            sleep(5)
+                    #se il caricamento fallisce per mancanza di connessione mi metto in attesa di avere connessione
+                    except urllib3.exceptions.MaxRetryError:
+                        graphic_util.show_error_msg("Attendo che tu sia collegato alla rete! ")
+                        while not uploader.has_connection():
+                            if _FINISH:
+                                # se il main non e' piu' attivo, termino anche il processo di caricamento
+                                exit(0)
+                            else:
+                                sleep(5)
 
-                    graphic_util.show_error_msg("Riprendo il caricamento")
+                        graphic_util.show_error_msg("Riprendo il caricamento")
+            except OSError:
+                pass
 
             #sospendo il processo per 5 secondi
             sleep(5)
